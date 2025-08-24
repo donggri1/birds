@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="/main.css">
+  </head>
+  <body class="bg-gray-100">
+    <!-- 
+      메인 컨테이너
+      - flex: Flexbox 레이아웃
+      - justify-center: 가운데 정렬
+      - p-4: 패딩
+    -->
+    <div class="flex justify-center p-4">
+      <!-- 
+        전체 레이아웃 래퍼
+        - flex: Flexbox 레이아웃
+        - w-full: 전체 너비
+        - max-w-6xl: 최대 너비
+      -->
+      <div class="flex w-full max-w-6xl">
+        <!-- 
+          프로필 섹션 (왼쪽)
+          - w-1/4: 너비 25%
+          - mr-4: 오른쪽 마진
+        -->
+        <div class="w-1/4 mr-4">
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            {% if user and user.id %}
+              <div class="text-center">
+                <div class="font-bold text-lg mb-2">{{'안녕하세요! ' + user.nick + '님'}}</div>
+                <div class="flex justify-around mb-4">
+                  <div>
+                    <div class="text-gray-600">팔로잉</div>
+                    <div class="font-bold text-xl">{{followingCount}}</div>
+                  </div>
+                  <div>
+                    <div class="text-gray-600">팔로워</div>
+                    <div class="font-bold text-xl">{{followerCount}}</div>
+                  </div>
+                </div>
+                <input id="my-id" type="hidden" value="{{user.id}}">
+                <a href="/" class="block w-full bg-blue-500 text-white text-center py-2 rounded-md mb-2 hover:bg-blue-600">홈</a>
+                <a href="/profile" class="block w-full bg-blue-500 text-white text-center py-2 rounded-md mb-2 hover:bg-blue-600">내 프로필</a>
+                <a href="/community" class="block w-full bg-blue-500 text-white text-center py-2 rounded-md mb-2 hover:bg-blue-600">자유게시판</a>
+                <a href="/auth/logout" class="block w-full bg-gray-300 text-gray-700 text-center py-2 rounded-md hover:bg-gray-400">로그아웃</a>
+              </div>
+            {% else %}
+              <form id="login-form" action="/auth/login" method="post">
+                <div class="mb-2">
+                  <label for="email" class="block text-sm font-medium text-gray-700">이메일</label>
+                  <input id="email" type="email" name="email" required autofocus class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="mb-4">
+                  <label for="password" class="block text-sm font-medium text-gray-700">비밀번호</label>
+                  <input id="password" type="password" name="password" required class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <button id="login" type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">로그인</button>
+                <a id="join" href="/join" class="block w-full text-center bg-gray-200 text-gray-700 py-2 rounded-md mt-2 hover:bg-gray-300">회원가입</a>
+                <a id="kakao" href="/auth/kakao" class="block w-full text-center bg-yellow-400 text-black py-2 rounded-md mt-2 hover:bg-yellow-500">카카오톡</a>
+              </form>
+            {% endif %}
+          </div>
+          <footer class="text-center text-xs text-gray-500 mt-4">
+            Made by dCha
+          </footer>
+        </div>
+        <!-- 
+          메인 콘텐츠 (오른쪽)
+          - w-3/4: 너비 75%
+        -->
+        <div class="w-3/4">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      window.onload = () => {
+        if (new URL(location.href).searchParams.get('error')) {
+          alert(new URL(location.href).searchParams.get('error'));
+        }
+      };
+    </script>
+    {% block script %}{% endblock %}
+    {% if user and user.id %}
+    <!-- 
+      채팅 컨테이너
+      - fixed: 고정 위치
+      - bottom-4 right-4: 오른쪽 하단
+      - w-80: 너비
+      - bg-white: 배경색
+      - rounded-lg shadow-xl: 스타일
+      - flex flex-col: Flexbox 세로 정렬
+    -->
+    <div id="chat-container" class="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl flex flex-col" style="display: none;">
+        <div id="chat-header" class="flex justify-between items-center p-2 bg-gray-200 rounded-t-lg">
+            <h2 class="font-bold">live chat</h2>
+            <button id="chat-close-btn" class="text-gray-500 hover:text-gray-800">X</button>
+        </div>
+        <div id="chat-messages" class="flex-grow p-2 overflow-y-auto h-64"></div>
+        <form id="chat-form" class="p-2 border-t">
+            <input type="text" id="chat-input" placeholder="메시지를 입력하세요" autocomplete="off" class="w-full p-2 border border-gray-300 rounded-md" />
+            <button type="submit" class="hidden">send</button>
+        </form>
+    </div>
+    <button id="chat-open-btn" class="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg">채팅</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io({ path: '/socket.io' });
+
+        const chatContainer = document.getElementById('chat-container');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const closeBtn = document.getElementById('chat-close-btn');
+        const chatOpenBtn = document.getElementById('chat-open-btn');
+
+        chatOpenBtn.addEventListener('click', () => {
+            chatContainer.style.display = 'flex';
+            chatOpenBtn.style.display = 'none';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatContainer.style.display = 'none';
+            chatOpenBtn.style.display = 'block';
+        });
+
+        socket.on('connect', () => {
+            console.log('서버에 연결되었습니다.');
+        });
+
+        socket.on('error', (error) => {
+            alert(error);
+        });
+
+        socket.on('join', (data) => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('text-sm', 'text-gray-500', 'text-center', 'my-1');
+            messageElement.textContent = data.chat;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        socket.on('exit', (data) => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('text-sm', 'text-gray-500', 'text-center', 'my-1');
+            messageElement.textContent = data.chat;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        socket.on('chat', (data) => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('my-1');
+            const userElement = document.createElement('span');
+            userElement.textContent = data.user.nick + ': ';
+            userElement.style.fontWeight = 'bold';
+            messageElement.appendChild(userElement);
+            const chatElement = document.createElement('span');
+            chatElement.textContent = data.chat;
+            messageElement.appendChild(chatElement);
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (chatInput.value) {
+                socket.emit('chat', { chat: chatInput.value });
+                chatInput.value = '';
+            }
+        });
+    </script>
+    {% endif %}
+  </body>
+</html>

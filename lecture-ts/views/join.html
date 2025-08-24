@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- 
+  회원가입 폼 컨테이너
+  - max-w-md: 최대 너비 md
+  - mx-auto: 좌우 마진 auto (가운데 정렬)
+  - p-4: 패딩 1rem
+  - bg-white: 배경색 흰색
+  - rounded-lg: 모서리 둥글게 (large)
+  - shadow-md: 그림자 효과
+  - mt-4: 위쪽 마진 1rem
+-->
+<div class="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-4">
+  <h2 class="text-2xl font-bold mb-4 text-center">회원가입</h2>
+  <form id="join-form" action="/auth/join" method="post">
+    <!-- 
+      폼 그룹
+      - mb-4: 아래쪽 마진 1rem
+    -->
+    <div class="mb-4">
+      <!-- 
+        폼 라벨
+        - block: 블록 요소로 변경
+        - text-gray-700: 텍스트 색상 회색
+        - text-sm: 작은 텍스트
+        - font-bold: 굵은 글씨
+        - mb-2: 아래쪽 마진 0.5rem
+      -->
+      <label for="join-email" class="block text-gray-700 text-sm font-bold mb-2">이메일</label>
+      <input id="join-email" type="email" name="email" class="w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <div class="mb-4">
+      <label for="join-nick" class="block text-gray-700 text-sm font-bold mb-2">닉네임</label>
+      <input id="join-nick" type="text" name="nick" class="w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <div class="mb-4">
+      <label for="join-password" class="block text-gray-700 text-sm font-bold mb-2">비밀번호</label>
+      <input id="join-password" type="password" name="password" class="w-full p-2 border border-gray-300 rounded-md">
+    </div>
+    <!-- 
+      회원가입 버튼
+      - w-full: 너비 100%
+      - bg-blue-500: 배경색 파란색
+      - text-white: 텍스트 색상 흰색
+      - py-2: 상하 패딩 0.5rem
+      - rounded-md: 모서리 둥글게 (medium)
+      - hover:bg-blue-600: 마우스를 올렸을 때 배경색 변경
+    -->
+    <button id="join-btn" type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">회원가입</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    window.onload = () => {
+      if (new URL(location.href).searchParams.get('error')) {
+        alert('이미 존재하는 이메일입니다.');
+      }
+    };
+  </script>
+{% endblock %}

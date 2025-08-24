@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!-- 
+  메인 컨테이너
+  - max-w-4xl: 최대 너비 4xl
+  - mx-auto: 좌우 마진 auto (가운데 정렬)
+  - p-4: 패딩 1rem
+  - bg-white: 배경색 흰색
+  - rounded-lg: 모서리 둥글게 (large)
+  - shadow-md: 그림자 효과
+  - mt-4: 위쪽 마진 1rem
+-->
+<div class="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-md mt-4">
+    <!-- 
+      페이지 제목과 새 글 작성 버튼
+      - flex: Flexbox 레이아웃
+      - justify-between: 항목들을 양쪽 끝으로 정렬
+      - items-center: 항목들을 세로 방향으로 가운데 정렬
+      - mb-4: 아래쪽 마진 1rem
+    -->
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">자유게시판</h2>
+        <a href="/community/write" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">새 글 작성</a>
+    </div>
+    <!-- 
+      게시글 테이블
+      - w-full: 너비 100%
+      - text-left: 텍스트 왼쪽 정렬
+      - border-collapse: 테두리 겹침
+    -->
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr>
+                <!-- 
+                  테이블 헤더 셀
+                  - p-2: 패딩 0.5rem
+                  - border-b: 아래쪽 테두리
+                  - font-bold: 굵은 글씨
+                  - text-gray-600: 텍스트 색상 회색
+                -->
+                <th class="p-2 border-b font-bold text-gray-600">제목</th>
+                <th class="p-2 border-b font-bold text-gray-600">작성자</th>
+                <th class="p-2 border-b font-bold text-gray-600">작성일</th>
+                <th class="p-2 border-b font-bold text-gray-600"></th> {# 수정/삭제 버튼을 위한 빈 헤더 #}
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <!-- 
+              테이블 행
+              - hover:bg-gray-100: 마우스를 올렸을 때 배경색 변경
+            -->
+            <tr class="hover:bg-gray-100">
+                <!-- 
+                  테이블 데이터 셀
+                  - p-2: 패딩 0.5rem
+                  - border-b: 아래쪽 테두리
+                -->
+                <td class="p-2 border-b"><a href="/community/{{ post.id }}" class="text-blue-500 hover:underline">{{ post.title }}</a></td>
+                <td class="p-2 border-b">{{ post.User.nick }}</td>
+                <td class="p-2 border-b">{{ post.createdAt.toLocaleString() }}</td>
+                <td class="p-2 border-b text-right">
+                    {% if user and user.id === post.UserId %}
+                    <!-- 
+                      수정/삭제 버튼
+                      - space-x-2: 항목들 사이의 간격
+                    -->
+                    <div class="space-x-2">
+                        <a href="/community/edit/{{ post.id }}" class="text-yellow-500 hover:underline text-sm">수정</a>
+                        <button class="text-red-500 hover:underline text-sm delete-btn" data-post-id="{{ post.id }}">삭제</button>
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 삭제 버튼 클릭 시 동작하는 JavaScript 코드
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const postId = e.target.dataset.postId; // data-post-id 속성에서 게시글 ID를 가져옵니다.
+            if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) { // 사용자에게 삭제 확인 메시지를 띄웁니다.
+                try {
+                    // fetch API를 사용하여 DELETE 요청을 보냅니다.
+                    const response = await fetch(`/community/${postId}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) { // 요청이 성공하면 (HTTP 상태 코드 200-299)
+                        alert('게시글이 삭제되었습니다.');
+                        window.location.reload(); // 페이지를 새로고침하여 변경된 목록을 보여줍니다.
+                    } else { // 요청이 실패하면
+                        const errorText = await response.text();
+                        alert(`게시글 삭제 실패: ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error('삭제 중 오류 발생:', error);
+                    alert('게시글 삭제 중 오류가 발생했습니다.');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

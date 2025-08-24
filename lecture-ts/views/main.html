@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <!-- 
+      Tailwind CSS를 사용한 메인 컨테이너 스타일링
+      - max-w-4xl: 최대 너비를 4xl(56rem)로 제한
+      - mx-auto: 좌우 마진을 auto로 설정하여 가운데 정렬
+      - p-4: 모든 방향에 1rem(16px)의 패딩을 적용
+    -->
+    <div class="max-w-4xl mx-auto p-4">
+      {% if user %}
+        <!-- 
+          게시글 작성 폼 스타일링
+          - bg-white: 배경색을 흰색으로 설정
+          - p-4: 모든 방향에 1rem(16px)의 패딩을 적용
+          - rounded-lg: 모서리를 둥글게 만듦 (large)
+          - shadow-md: 중간 크기의 그림자 효과를 추가
+          - mb-4: 아래쪽 마진을 1rem(16px)으로 설정
+        -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+          <form id="twit-form" action="/post" method="post" enctype="multipart/form-data">
+            <!-- 
+              텍스트 영역 스타일링
+              - w-full: 너비를 100%로 설정
+              - p-2: 모든 방향에 0.5rem(8px)의 패딩을 적용
+              - border: 1px의 테두리를 추가
+              - border-gray-300: 테두리 색상을 회색으로 설정
+              - rounded-md: 모서리를 둥글게 만듦 (medium)
+            -->
+            <div class="input-group mb-2">
+              <textarea id="twit" name="content" maxlength="140" class="w-full p-2 border border-gray-300 rounded-md" placeholder="무슨 일이 있었나요?"></textarea>
+            </div>
+            <div class="img-preview mb-2">
+              <img id="img-preview" src="" style="display: none;" width="250" alt="미리보기" class="rounded-md">
+              <input id="img-url" type="hidden" name="url">
+            </div>
+            <!-- 
+              버튼 및 파일 업로드 영역 스타일링
+              - flex: Flexbox 레이아웃을 사용
+              - justify-between: 항목들을 양쪽 끝으로 정렬
+              - items-center: 항목들을 세로 방향으로 가운데 정렬
+            -->
+            <div class="flex justify-between items-center">
+              <!-- 
+                파일 업로드 라벨 스타일링
+                - cursor-pointer: 마우스 커서를 포인터로 변경
+                - text-blue-500: 텍스트 색상을 파란색으로 설정
+                - hover:text-blue-700: 마우스를 올렸을 때 텍스트 색상을 진한 파란색으로 변경
+              -->
+              <label id="img-label" for="img" class="cursor-pointer text-blue-500 hover:text-blue-700">사진 업로드</label>
+              <input id="img" type="file" accept="image/*" class="hidden">
+              <!-- 
+                전송 버튼 스타일링
+                - bg-blue-500: 배경색을 파란색으로 설정
+                - text-white: 텍스트 색상을 흰색으로 설정
+                - px-4: 좌우 패딩을 1rem(16px)으로 설정
+                - py-2: 상하 패딩을 0.5rem(8px)으로 설정
+                - rounded-md: 모서리를 둥글게 만듦 (medium)
+                - hover:bg-blue-700: 마우스를 올렸을 때 배경색을 진한 파란색으로 변경
+              -->
+              <button id="twit-btn" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">twit</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+      <!-- 
+        게시글 목록 컨테이너
+      -->
+      <div class="twits">
+        <!-- 
+          해시태그 검색 폼
+          - mb-4: 아래쪽 마진을 1rem(16px)으로 설정
+        -->
+        <form id="hashtag-form" action="/hashtag" class="mb-4">
+          <input type="text" name="hashtag" placeholder="태그 검색" class="p-2 border border-gray-300 rounded-md">
+          <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">검색</button>
+        </form>
+        {% for twit in twits %}
+          <!-- 
+            개별 게시글 스타일링
+            - bg-white: 배경색을 흰색으로 설정
+            - p-4: 모든 방향에 1rem(16px)의 패딩을 적용
+            - rounded-lg: 모서리를 둥글게 만듦 (large)
+            - shadow-md: 중간 크기의 그림자 효과를 추가
+            - mb-4: 아래쪽 마진을 1rem(16px)으로 설정
+          -->
+          <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <input type="hidden" value="{{twit.User.id}}" class="twit-user-id">
+            <input type="hidden" value="{{twit.id}}" class="twit-id">
+            <!-- 
+              작성자 및 팔로우 버튼 영역
+              - flex: Flexbox 레이아웃을 사용
+              - justify-between: 항목들을 양쪽 끝으로 정렬
+              - items-center: 항목들을 세로 방향으로 가운데 정렬
+              - mb-2: 아래쪽 마진을 0.5rem(8px)으로 설정
+            -->
+            <div class="flex justify-between items-center mb-2">
+                <!-- 
+                  작성자 닉네임
+                  - font-bold: 텍스트를 굵게 설정
+                -->
+              <div class="font-bold">{{twit.User.nick}}</div>
+              {% if not followingIdList.includes(twit.User.id) and twit.User.id !== user.id %}
+                <!-- 
+                  팔로우 버튼
+                  - bg-green-500: 배경색을 녹색으로 설정
+                  - text-white: 텍스트 색상을 흰색으로 설정
+                  - px-3: 좌우 패딩을 0.75rem(12px)으로 설정
+                  - py-1: 상하 패딩을 0.25rem(4px)으로 설정
+                  - rounded-full: 모서리를 완전히 둥글게 만듦
+                  - text-sm: 텍스트 크기를 작게 설정
+                  - hover:bg-green-700: 마우스를 올렸을 때 배경색을 진한 녹색으로 변경
+                -->
+                <button class="twit-follow bg-green-500 text-white px-3 py-1 rounded-full text-sm hover:bg-green-700">팔로우하기</button>
+              {% endif %}
+            </div>
+            <!-- 
+              게시글 내용
+              - mb-2: 아래쪽 마진을 0.5rem(8px)으로 설정
+            -->
+            <div class="mb-2">{{twit.content}}</div>
+            {% if twit.img %}
+              <!-- 
+                게시글 이미지
+                - rounded-lg: 모서리를 둥글게 만듦 (large)
+              -->
+              <div class="twit-img"><img src="{{ twit.img | replace('/img/', '/uploads/') }}" onerror="this.src = this.src.replace(/\/thumb\//,'/original/');" alt="섬네일" class="rounded-lg"></div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    if (document.getElementById('img')) {
+      document.getElementById('img').addEventListener('change', function(e) {
+        const formData = new FormData();
+        console.log(this, this.files);
+        formData.append('img', this.files[0]);
+        axios.post('/post/img', formData)
+          .then((res) => {
+            document.getElementById('img-url').value = res.data.url;
+              // document.getElementById('img-preview').src = res.data.originalUrl;
+            document.getElementById('img-preview').src = res.data.url;
+            document.getElementById('img-preview').style.display = 'inline';
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      });
+    }
+    document.querySelectorAll('.twit-follow').forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        const myId = document.querySelector('#my-id');
+        if (myId) {
+          const userId = tag.parentNode.querySelector('.twit-user-id').value;
+          if (userId !== myId.value) {
+            if (confirm('팔로잉하시겠습니까?')) {
+              axios.post(`/user/${userId}/follow`)
+                .then(() => {
+                  location.reload();
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            }
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}

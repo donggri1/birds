@@ -1,0 +1,25 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+
+# Environment variables
+.env
+
+# IDE and OS files
+.idea/
+.DS_Store
+
+# Test coverage
+coverage/
+
+# Uploaded files (from lecture-ts context)
+uploads/
+*.log
+*.js
+GEMINI.md

@@ -1,0 +1,5 @@
+/* Tailwind CSS의 기본 스타일, 구성 요소 및 유틸리티 클래스를 가져옵니다. */
+/* 이 지시문들은 빌드 시점에 실제 CSS 코드로 변환됩니다. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

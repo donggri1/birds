@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- 
+  메인 컨테이너
+  - max-w-2xl: 최대 너비 2xl
+  - mx-auto: 좌우 마진 auto (가운데 정렬)
+  - p-4: 패딩 1rem
+  - bg-white: 배경색 흰색
+  - rounded-lg: 모서리 둥글게 (large)
+  - shadow-md: 그림자 효과
+  - mt-4: 위쪽 마진 1rem
+-->
+<div class="max-w-2xl mx-auto p-4 bg-white rounded-lg shadow-md mt-4">
+    <!-- 
+      폼 제목
+      - text-2xl: 텍스트 크기 2xl
+      - font-bold: 굵은 글씨
+      - mb-4: 아래쪽 마진 1rem
+    -->
+    <h2 class="text-2xl font-bold mb-4">{% if isEdit %}게시글 수정{% else %}새 글 작성{% endif %}</h2>
+    
+    <form action="{% if isEdit %}/community/{{ post.id }}?_method=PUT{% else %}/community{% endif %}" method="post" enctype="multipart/form-data">
+        <!-- 
+          폼 그룹
+          - mb-4: 아래쪽 마진 1rem
+        -->
+        <div class="mb-4">
+            <!-- 
+              폼 라벨
+              - block: 블록 요소로 변경
+              - text-gray-700: 텍스트 색상 회색
+              - text-sm: 작은 텍스트
+              - font-bold: 굵은 글씨
+              - mb-2: 아래쪽 마진 0.5rem
+            -->
+            <label for="title" class="block text-gray-700 text-sm font-bold mb-2">제목</label>
+            <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded-md" value="{{ post.title if post else '' }}" required>
+        </div>
+        <div class="mb-4">
+            <label for="content" class="block text-gray-700 text-sm font-bold mb-2">내용</label>
+            <textarea id="content" name="content" rows="5" class="w-full p-2 border border-gray-300 rounded-md" required>{{ post.content if post else '' }}</textarea>
+        </div>
+        <div class="mb-4">
+            <label for="img" class="block text-gray-700 text-sm font-bold mb-2">이미지</label>
+            <input type="file" id="img" name="img" class="w-full p-2 border border-gray-300 rounded-md">
+            {% if post and post.img %}
+                <img src="/uploads/{{ post.img }}" alt="게시글 이미지" class="mt-2 rounded-md" style="max-width: 100%;">
+            {% endif %}
+        </div>
+        <!-- 
+          버튼 그룹
+          - flex: Flexbox 레이아웃
+          - justify-end: 항목들을 오른쪽으로 정렬
+          - space-x-2: 항목들 사이의 간격
+        -->
+        <div class="flex justify-end space-x-2">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">{% if isEdit %}수정{% else %}작성{% endif %}</button>
+            <a href="/community" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">취소</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

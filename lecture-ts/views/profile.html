@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- 
+  프로필 컨테이너
+  - max-w-4xl: 최대 너비 4xl
+  - mx-auto: 좌우 마진 auto (가운데 정렬)
+  - p-4: 패딩 1rem
+  - mt-4: 위쪽 마진 1rem
+-->
+<div class="max-w-4xl mx-auto p-4 mt-4">
+  <!-- 
+    팔로잉/팔로워 목록 그리드
+    - grid: 그리드 레이아웃
+    - grid-cols-1: 1개의 열
+    - md:grid-cols-2: 중간 화면 크기 이상에서는 2개의 열
+    - gap-4: 그리드 아이템 사이의 간격 1rem
+  -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- 
+      팔로잉 목록
+      - bg-white: 배경색 흰색
+      - p-4: 패딩 1rem
+      - rounded-lg: 모서리 둥글게 (large)
+      - shadow-md: 그림자 효과
+    -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-xl font-bold mb-4">팔로잉 목록</h2>
+      {% if user.Followings %}
+        <ul>
+          {% for following in user.Followings %}
+            <!-- 
+              팔로잉 아이템
+              - py-2: 상하 패딩 0.5rem
+              - border-b: 아래쪽 테두리
+            -->
+            <li class="py-2 border-b">{{following.nick}}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-gray-500">팔로잉하는 사용자가 없습니다.</p>
+      {% endif %}
+    </div>
+    <!-- 
+      팔로워 목록
+      - bg-white: 배경색 흰색
+      - p-4: 패딩 1rem
+      - rounded-lg: 모서리 둥글게 (large)
+      - shadow-md: 그림자 효과
+    -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-xl font-bold mb-4">팔로워 목록</h2>
+      {% if user.Followers %}
+        <ul>
+          {% for follower in user.Followers %}
+            <!-- 
+              팔로워 아이템
+              - py-2: 상하 패딩 0.5rem
+              - border-b: 아래쪽 테두리
+            -->
+            <li class="py-2 border-b">{{follower.nick}}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-gray-500">팔로워가 없습니다.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
