@@ -12,8 +12,9 @@ const useSocket = (roomId: string | undefined) => {
   useEffect(() => {
     if (!roomId) return;
 
-    // 백엔드 소켓 서버의 기본 네임스페이스에 연결합니다.
-    const newSocket = io({ 
+    // 백엔드 소켓 서버의 URL을 명시적으로 지정합니다.
+    // 백엔드 서버가 다른 포트나 도메인에서 실행 중인 경우 여기에 정확한 주소를 입력해야 합니다.
+    const newSocket = io('http://localhost:8001', { 
       path: '/socket.io',
       transports: ['websocket'],
     });

@@ -7,12 +7,10 @@ export default () => {
         clientID : process.env.KAKAO_ID!,
         callbackURL:'/auth/kakao/callback',
     }, async(accessToken, refreshToken, profile, done)=>{
-        console.log('profile',profile);
         try{
             const exUser = await User.findOne({
                 where:{snsId:profile.id,provider:'kakao'}
             });
-            console.log('엑스유저임',exUser);
 
             if(exUser){
                 done(null,exUser);

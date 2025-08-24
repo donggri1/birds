@@ -23,7 +23,6 @@ export default (server: HttpServer, app: any, sessionMiddleware: RequestHandler)
 
     // 클라이언트 연결 이벤트 처리
     io.on('connection', async (socket: any) => {
-        console.log('새로운 클라이언트 접속', socket.id);
         const req = socket.request;
 
         try {

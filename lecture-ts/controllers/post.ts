@@ -4,7 +4,6 @@ import User from '../models/user'; // User 모델 import 추가
 import { RequestHandler } from 'express';
 
 const afterUploadImage: RequestHandler = (req, res) => {
-    console.log(req.file);
     // const originalUrl = req.file?.location! ; // multerS3를 사용하면 req.file에 location이 생김
     // const url = originalUrl.replace(/\/original\//,`/thumb/`); // 원본 이미지 URL에서 썸네일 URL로 변경
     // res.json({url , originalUrl}); // multerS3를 사용하면 req.file에 location이 생김
@@ -30,7 +29,6 @@ const uploadPost: RequestHandler = async (req, res, next) => {
                     where: { title: tag.slice(1).toLowerCase() }
                 })
             }));
-            console.log(result, 'result');
             await post.addHashtags(...result.map(r => r[0]));
         }
         res.redirect('/');

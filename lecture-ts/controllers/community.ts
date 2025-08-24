@@ -235,7 +235,6 @@ export const apiCreatePost: RequestHandler = async (req, res, next) => {
     const { title, content } = req.body;
     const userId = req.user?.id;
     const img = req.file?.filename;
-
     if (!userId) {
         return res.status(403).json({ message: '로그인이 필요합니다.' });
     }

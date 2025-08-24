@@ -24,6 +24,7 @@ interface Post {
   User: User;
   UserId: number;
   Comments: Comment[];
+      img: string | null; // 이미지 파일명 추가
 }
 
 interface OutletContextType {
@@ -112,6 +113,17 @@ export default function CommunityDetailPage() {
         <div className="prose max-w-none">
           {post.content}
         </div>
+        {/* 이미지가 있다면 출력 */}
+        {/* 이미지가 있다면 출력 */}
+        {post.img && (
+          <div className="mt-4">
+            <img
+              src={`/uploads/${post.img}`} // 이미지 URL (서버의 /img 경로에 이미지가 있다고 가정)
+              alt="Post image"
+              className="w-full h-auto object-cover rounded-lg shadow-md"
+            />
+          </div>
+        )}
         {user && user.id === post.UserId && (
           <div className="text-right mt-4 space-x-2">
             {/* TODO: 수정 기능 구현 */}
