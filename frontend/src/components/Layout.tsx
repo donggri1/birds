@@ -77,16 +77,18 @@ export default function Layout() {
       {user && (
         <>
           {isChatOpen && (
-            <div className="fixed bottom-20 right-4 z-20">
-              <Chat />
+            <div className="fixed bottom-4 right-4 z-20">
+              <Chat setIsChatOpen={setIsChatOpen} /> {/* setIsChatOpen prop 전달 */}
             </div>
           )}
-          <button 
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            className="fixed bottom-4 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl z-30 hover:bg-blue-700 transition-transform transform hover:scale-110"
-          >
-            {isChatOpen ? 'X' : '💬'}
-          </button>
+          {!isChatOpen && ( // isChatOpen이 false일 때만 버튼 표시
+            <button 
+              onClick={() => setIsChatOpen(true)} // 버튼 클릭 시 isChatOpen을 true로 설정
+              className="fixed bottom-4 right-4 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl z-30 hover:bg-blue-700 transition-transform transform hover:scale-110"
+            >
+              💬
+            </button>
+          )}
         </>
       )}
     </div>

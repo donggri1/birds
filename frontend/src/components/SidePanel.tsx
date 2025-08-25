@@ -79,7 +79,7 @@ export default function SidePanel({ user, onLogout }: SidePanelProps) {
         )}
       </div>
       <footer className="text-center text-xs text-gray-500 mt-4">
-        JetBrains 제작 (Junie)
+        made by dCha
       </footer>
     </div>
   );

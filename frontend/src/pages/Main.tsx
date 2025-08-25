@@ -106,7 +106,7 @@ export default function Main() {
     <div className="space-y-8">
       {user && (
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">새 게시글 작성</h2>
+          <h2 className="text-xl font-bold mb-4">New Post</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <textarea
               value={content}
@@ -118,13 +118,13 @@ export default function Main() {
             <div className="flex justify-between items-center">
               <div>
                 <label htmlFor="image-upload" className="cursor-pointer text-blue-500 hover:text-blue-700">
-                  이미지 선택
+                  Image Upload
                 </label>
                 <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                {imageUrl && <span className="ml-4 text-sm text-gray-600">이미지 선택됨</span>}
+                {imageUrl && <span className="ml-4 text-sm text-gray-600">Image Selected</span>}
               </div>
               <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                게시하기
+                post
               </button>
             </div>
           </form>
@@ -132,7 +132,7 @@ export default function Main() {
       )}
 
       <div className="space-y-4">
-        <h2 className="text-xl font-bold">타임라인</h2>
+        <h2 className="text-xl font-bold">Time Line</h2>
         {posts.map(post => (
           <div key={post.id} className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center justify-between mb-2">
