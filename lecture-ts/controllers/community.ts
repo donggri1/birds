@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import Community from '../models/community';
 import { User, Comment } from '../models'; // Comment 모델 import 경로 수정
+import { Op } from 'sequelize';
 
 //<editor-fold desc="기존 서버 사이드 렌더링(SSR) 컨트롤러">
 
@@ -204,8 +205,9 @@ export const apiGetPosts: RequestHandler = async (req, res, next) => {
 
 export const apiGetPost: RequestHandler = async (req, res, next) => {
     try {
+        const postId = parseInt(req.params.id, 10);
         const post = await Community.findOne({
-            where: { id: req.params.id },
+            where: { id: postId },
             include: [
                 {
                     model: User,
@@ -221,10 +223,32 @@ export const apiGetPost: RequestHandler = async (req, res, next) => {
                 },
             ],
         });
+
         if (!post) {
             return res.status(404).json({ message: '게시글을 찾을 수 없습니다.' });
         }
-        res.json(post);
+
+        // 이전 글 찾기
+        const prevPost = await Community.findOne({
+            where: { id: { [Op.lt]: postId } }, // op.lt는 less than (작다) op는 sequelize에서 제공하는 연산자, lt는 less than
+            order: [['id', 'DESC']],
+            attributes: ['id', 'title'],
+        });
+
+        // 다음 글 찾기
+        const nextPost = await Community.findOne({
+            where: { id: { [Op.gt]: postId } },
+            order: [['id', 'ASC']],
+            attributes: ['id', 'title'],
+        });
+
+        // 현재 게시글 정보와 이전/다음 글 정보를 함께 응답
+        res.json({
+            post,
+            prevPost,
+            nextPost,
+        });
+
     } catch (error) {
         console.error(error);
         next(error);

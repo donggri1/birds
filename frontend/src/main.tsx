@@ -13,7 +13,7 @@ ReactDOM.createRoot(rootElement).render(
   // React.StrictMode는 개발 중에 잠재적인 문제를 감지하고 경고를 표시하는 데 도움이 됩니다.
   <React.StrictMode>
     {/* BrowserRouter는 HTML5 History API를 사용하여 UI와 URL을 동기화하는 라우터입니다. */}
-    {/* 이 컴포넌트로 App을 감싸면, App 컴포넌트와 그 모든 자식 컴포넌트에서 라우팅 기능을 사용할 수 있게 됩니다. */}
+    {/* 이 컴포넌트로 App을 감싸면, App 컴포넌트와 그 모든 자식 컴포넌트에서 라우팅 기능을 사용할 수 있게 됩니다 */}
     <BrowserRouter>
       <App />
     </BrowserRouter>

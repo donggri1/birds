@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { useParams, useNavigate, useOutletContext, Link } from 'react-router-dom';
 import axios from 'axios';
 
 // 타입 정의
@@ -24,7 +24,20 @@ interface Post {
   User: User;
   UserId: number;
   Comments: Comment[];
-      img: string | null; // 이미지 파일명 추가
+  img: string | null;
+}
+
+// 이전/다음 포스트 정보 타입
+interface NavPost {
+  id: number;
+  title: string;
+}
+
+// API 응답 데이터 전체 타입
+interface PostData {
+  post: Post;
+  prevPost: NavPost | null;
+  nextPost: NavPost | null;
 }
 
 interface OutletContextType {
@@ -40,14 +53,25 @@ export default function CommunityDetailPage() {
   const navigate = useNavigate();
 
   const [post, setPost] = useState<Post | null>(null);
+  const [prevPost, setPrevPost] = useState<NavPost | null>(null);
+  const [nextPost, setNextPost] = useState<NavPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [commentContent, setCommentContent] = useState('');
 
   const fetchPost = async () => {
+    // 데이터를 불러오기 전, 이전 상태를 초기화하고 로딩 상태로 설정
+    setLoading(true);
+    setPost(null);
+    setPrevPost(null);
+    setNextPost(null);
+    setError(null);
     try {
-      const response = await axios.get<Post>(`/api/community/api/${id}`);
-      setPost(response.data);
+      // API로부터 게시글, 이전 글, 다음 글 정보를 받아옴
+      const response = await axios.get<PostData>(`/api/community/api/${id}`);
+      setPost(response.data.post);
+      setPrevPost(response.data.prevPost);
+      setNextPost(response.data.nextPost);
     } catch (err) {
       setError('게시글을 불러오는 데 실패했습니다.');
       console.error(err);
@@ -56,6 +80,7 @@ export default function CommunityDetailPage() {
     }
   };
 
+  // id가 변경될 때마다 게시글을 다시 불러옴
   useEffect(() => {
     fetchPost();
   }, [id]);
@@ -110,15 +135,13 @@ export default function CommunityDetailPage() {
           <span>작성자: {post.User.nick}</span>
           <span>{new Date(post.createdAt).toLocaleString()}</span>
         </div>
-        <div className="prose max-w-none">
+        <div className="prose max-w-none min-h-[200px]">
           {post.content}
         </div>
-        {/* 이미지가 있다면 출력 */}
-        {/* 이미지가 있다면 출력 */}
         {post.img && (
           <div className="mt-4">
             <img
-              src={`/uploads/${post.img}`} // 이미지 URL (서버의 /img 경로에 이미지가 있다고 가정)
+              src={`/uploads/${post.img}`}
               alt="Post image"
               className="w-full h-auto object-cover rounded-lg shadow-md"
             />
@@ -126,10 +149,32 @@ export default function CommunityDetailPage() {
         )}
         {user && user.id === post.UserId && (
           <div className="text-right mt-4 space-x-2">
-            {/* TODO: 수정 기능 구현 */}
             <button className="px-3 py-1 bg-gray-200 rounded-md text-sm">수정</button>
             <button onClick={handlePostDelete} className="px-3 py-1 bg-red-500 text-white rounded-md text-sm">삭제</button>
           </div>
+        )}
+      </div>
+
+      {/* 이전/다음 글 내비게이션 */}
+      <div className="border-t border-b py-2 my-4">
+        {prevPost ? (
+          <Link to={`/community/${prevPost.id}`}>
+            <div className="p-2 hover:bg-gray-100 rounded-md">
+              <span className="font-semibold text-blue-600">이전 글:</span> {prevPost.title}
+            </div>
+          </Link>
+        ) : (
+          <div className="p-2 text-gray-400">이전 글이 없습니다.</div>
+        )}
+        <div className="border-t my-1"></div>
+        {nextPost ? (
+          <Link to={`/community/${nextPost.id}`}>
+            <div className="p-2 hover:bg-gray-100 rounded-md">
+              <span className="font-semibold text-blue-600">다음 글:</span> {nextPost.title}
+            </div>
+          </Link>
+        ) : (
+          <div className="p-2 text-gray-400">다음 글이 없습니다.</div>
         )}
       </div>
 
@@ -156,7 +201,7 @@ export default function CommunityDetailPage() {
 
       {/* 댓글 작성 폼 */}
       {user && (
-        <form onSubmit={handleCommentSubmit} className="flex gap-2">
+        <form onSubmit={handleCommentSubmit} className="flex gap-2 ">
           <input
             type="text"
             value={commentContent}
@@ -169,4 +214,4 @@ export default function CommunityDetailPage() {
       )}
     </div>
   );
-}
+};

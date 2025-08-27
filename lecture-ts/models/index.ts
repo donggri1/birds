@@ -5,6 +5,8 @@ import Hashtag from './hashtag';
 import Community from './community';
 import Comment from './comment'; // Comment 모델 import 추가
 import configObj from '../config/config';
+import fs from 'fs';
+import path from 'path';
 
 const env = process.env.NODE_ENV as 'production' | 'test' || 'development';
 const config = configObj[env];
@@ -14,6 +16,12 @@ const sequelize = new Sequelize.Sequelize(
   config.password,
   config
 );
+
+interface DbType{
+    sequelize : Sequelize.Sequelize;
+    [key:string]:any;
+}
+
 
 const db = {
   sequelize,
