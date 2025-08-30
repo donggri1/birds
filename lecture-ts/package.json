@@ -10,7 +10,8 @@
     "dev": "concurrently \"npm:dev:*\"",
     "tailwind:watch": "tailwindcss -i ./public/tailwind.css -o ./public/main.css --watch",
     "test": "jest",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "db:migrate": "npx ts-node node_modules/.bin/sequelize-cli db:migrate"
   },
   "author": "dCha",
   "license": "MIT",

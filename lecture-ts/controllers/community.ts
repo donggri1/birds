@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import Community from '../models/community';
-import { User, Comment } from '../models'; // Comment 모델 import 경로 수정
+import { User, Comment, Notification } from '../models'; // Notification 모델 추가
 import { Op } from 'sequelize';
 
 //<editor-fold desc="기존 서버 사이드 렌더링(SSR) 컨트롤러">
@@ -321,22 +321,45 @@ export const apiDeletePost: RequestHandler = async (req, res, next) => {
 
 export const apiCreateComment: RequestHandler = async (req, res, next) => {
     try {
-        const postId = parseInt(req.params.id as string, 10);
-        const { content } = req.body;
-        const userId = req.user?.id;
+        const postId = parseInt(req.params.id as string, 10); // 주소에서 게시글 ID를 가져옵니다.
+        const { content } = req.body; // 요청 본문에서 댓글 내용을 가져옵니다.
+        const userId = req.user?.id; // 로그인한 사용자의 ID를 가져옵니다.
 
+        // 로그인하지 않은 경우 에러 처리
         if (!userId) {
             return res.status(403).json({ message: '로그인이 필요합니다.' });
         }
+        // 댓글 내용이 없는 경우 에러 처리
         if (!content) {
             return res.status(400).json({ message: '댓글 내용을 입력해주세요.' });
         }
 
+        // Step 1: 댓글을 데이터베이스에 생성합니다.
         const comment = await Comment.create({
             content,
             UserId: userId,
             CommunityId: postId,
         });
+
+        // Step 2: 알림을 보내기 위해 원본 게시글을 찾습니다.
+        const post = await Community.findOne({ where: { id: postId } });
+
+
+        // Step 3: 게시글이 존재하고, 게시글 작성자와 댓글 작성자가 다른 경우에만 알림을 생성합니다.
+        // (자신이 자기 게시글에 댓글을 달 때는 알림을 보낼 필요가 없습니다.)
+        if (post && post.UserId !== userId) {
+            await Notification.create({
+                type: 'comment', // 알림 종류: 댓글
+                content: `[${post.title}] 게시글에 새로운 댓글이 달렸습니다.`, // 알림 메시지
+                read: false, // 초기에는 읽지 않은 상태(false)
+                recipientId: post.UserId, // 알림을 받을 사람: 게시글 작성자
+                senderId: userId,        // 알림을 보낸 사람: 댓글 작성자
+                link: `/community/${postId}`, // 알림 클릭 시 이동할 경로
+                // message: comment.content, // 알림에 포함할 댓글 내용
+            });
+        }
+
+        // Step 4: 성공적으로 생성된 댓글 정보를 클라이언트에게 반환합니다.
         res.status(201).json(comment);
     } catch (error) {
         console.error(error);

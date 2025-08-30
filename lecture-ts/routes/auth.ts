@@ -26,7 +26,8 @@ router.get('/kakao',passport.authenticate('kakao'));
 router.get('/kakao/callback', passport.authenticate('kakao', {
     failureRedirect: '/?error=카카오로그인 실패',
 }), (req, res) => {
-    res.redirect('/'); // 성공 시에는 / 로 이동
+    // res.redirect('/');
+    res.redirect('http://localhost:5173'); // 성공 시에는 / 로 이동
 });
 
 

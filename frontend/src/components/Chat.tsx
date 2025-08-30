@@ -1,8 +1,6 @@
 
-// /frontend/src/components/Chat.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
-import useSocket from '../hooks/useSocket';
+import useSockets from '../hooks/useSocket'; // useSockets 훅으로 변경
 
 // 메시지 타입을 정의합니다.
 interface IMessage {
@@ -20,14 +18,14 @@ interface ChatProps {
  * 모든 페이지의 레이아웃에 포함될 글로벌 채팅 컴포넌트
  */
 export default function Chat({ setIsChatOpen }: ChatProps) {
-  // "global" 채팅방에 연결합니다.
-  const { socket } = useSocket('global');
+  // useSockets 훅을 사용하고 chatSocket을 가져옵니다.
+  const { chatSocket } = useSockets();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!chatSocket) return;
 
     const handleSystemMessage = (data: { user: string; chat: string }) => {
       setMessages((prev) => [...prev, { user: { nick: 'System' }, chat: data.chat }]);
@@ -37,19 +35,21 @@ export default function Chat({ setIsChatOpen }: ChatProps) {
       setMessages((prev) => [...prev, data]);
     };
 
-    // 초기 메시지 목록을 받아오는 이벤트 (필요 시 구현)
-    socket.on('initialMessages', (msgs) => setMessages(msgs));
-    socket.on('join', handleSystemMessage);
-    socket.on('exit', handleSystemMessage);
-    socket.on('chat', handleChatMessage);
+    // 초기 메시지 목록을 받아오는 이벤트 (타입 명시)
+    const handleInitialMessages = (msgs: IMessage[]) => setMessages(msgs);
+
+    chatSocket.on('initialMessages', handleInitialMessages);
+    chatSocket.on('join', handleSystemMessage);
+    chatSocket.on('exit', handleSystemMessage);
+    chatSocket.on('chat', handleChatMessage);
 
     return () => {
-      socket.off('initialMessages');
-      socket.off('join', handleSystemMessage);
-      socket.off('exit', handleSystemMessage);
-      socket.off('chat', handleChatMessage);
+      chatSocket.off('initialMessages', handleInitialMessages);
+      chatSocket.off('join', handleSystemMessage);
+      chatSocket.off('exit', handleSystemMessage);
+      chatSocket.off('chat', handleChatMessage);
     };
-  }, [socket]);
+  }, [chatSocket]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,8 +57,8 @@ export default function Chat({ setIsChatOpen }: ChatProps) {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() && socket) {
-      socket.emit('chat', { chat: input });
+    if (input.trim() && chatSocket) {
+      chatSocket.emit('chat', { chat: input });
       setInput('');
     }
   };

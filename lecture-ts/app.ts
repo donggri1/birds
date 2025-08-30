@@ -17,6 +17,7 @@ import userRouter from './routes/user';
 import webSocket from './socket';
 
 import communityRouter from './routes/community';
+import notificationRouter from './routes/notification'; // 추가
 import methodOverride from 'method-override'; // 추가
 
 const app = express();
@@ -85,12 +86,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+import notificationRouter from './routes/notification';
+
 console.log("newBranch");
 app.use('/',pageRouter);
 app.use('/auth',authRouter);
 app.use('/post',postRouter);
 app.use('/user',userRouter);
 app.use('/community', communityRouter);
+app.use('/notifications', notificationRouter); // 알림 라우터 추가
 
 app.use((req,res,next)=>{
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다..`);

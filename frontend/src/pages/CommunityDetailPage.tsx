@@ -69,6 +69,7 @@ export default function CommunityDetailPage() {
     try {
       // API로부터 게시글, 이전 글, 다음 글 정보를 받아옴
       const response = await axios.get<PostData>(`/api/community/api/${id}`);
+      // const response = await axios.get<PostData>(`/api/community/${id}`);
       setPost(response.data.post);
       setPrevPost(response.data.prevPost);
       setNextPost(response.data.nextPost);
@@ -90,6 +91,7 @@ export default function CommunityDetailPage() {
     if (!commentContent.trim()) return;
     try {
       await axios.post(`/api/community/api/${id}/comments`, { content: commentContent });
+      // await axios.post(`/api/community/${id}/comments`, { content: commentContent });
       setCommentContent('');
       fetchPost(); // 댓글 작성 후 게시글 정보 다시 로드
     } catch (err) {
@@ -102,6 +104,7 @@ export default function CommunityDetailPage() {
     if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
       try {
         await axios.delete(`/api/community/api/${id}`);
+        // await axios.delete(`/api/community/${id}`);
         navigate('/community');
       } catch (err) {
         console.error('게시글 삭제 실패', err);
@@ -114,6 +117,7 @@ export default function CommunityDetailPage() {
     if (window.confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
       try {
         await axios.delete(`/api/community/api/${id}/comments/${commentId}`);
+        // await axios.delete(`/api/community/${id}/comments/${commentId}`);
         fetchPost(); // 댓글 삭제 후 게시글 정보 다시 로드
       } catch (err) {
         console.error('댓글 삭제 실패', err);
