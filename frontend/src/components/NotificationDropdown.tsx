@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import useSockets from '../hooks/useSocket'; // useSockets 훅 임포트
 
 // 알림 데이터 타입을 정의합니다.
 interface Notification {
@@ -18,9 +19,11 @@ interface NotificationDropdownProps {
 }
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const { notificationSocket } = useSockets(); // 소켓 훅 사용
 
-  // 컴포넌트 마운트 시 알림 목록을 가져옵니다.
+  // --- 데이터 초기 로딩 ---
+    // 컴포넌트 마운트 시 기존 알림 목록을 가져옵니다.
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -32,6 +35,26 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
     };
     fetchNotifications();
   }, []);
+
+  // --- 실시간 알림 수신 --- 
+  // notificationSocket이 연결되면, 실시간 알림 이벤트를 리스닝합니다.
+  useEffect(() => {
+    if (notificationSocket) {
+      // 서버로부터 'new_notification' 이벤트를 수신했을 때 실행될 핸들러
+      const handleNewNotification = (newNotification: Notification) => {
+        // 기존 알림 목록의 맨 앞에 새로운 알림을 추가하여 상태를 업데이트합니다.
+        setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
+      };
+
+      // 이벤트 리스너 등록
+      notificationSocket.on('new_notification', handleNewNotification);
+
+      // 컴포넌트가 언마운트될 때 이벤트 리스너를 정리합니다. (메모리 누수 방지)
+      return () => {
+        notificationSocket.off('new_notification', handleNewNotification);
+      };
+    }
+  }, [notificationSocket]); // notificationSocket 객체가 준비되면 이 useEffect를 실행합니다.
 
   // 알림을 읽음 상태로 변경하는 함수
   const handleMarkAsRead = async (id: number) => {
